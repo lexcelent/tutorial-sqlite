@@ -7,6 +7,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+/*
+TODO: Сделать структуру для БД, определить для нее методы
+*/
+
 // Книга
 type Book struct {
 	id       int
@@ -59,6 +63,26 @@ func InsertBooks(db *sql.DB) error {
 	return nil
 }
 
+// Добавить одну книгу
+func InsertBook(db *sql.DB, title, author string, num_pages int) error {
+	query := `
+		insert into books(title, author, num_pages, rating)
+		values (?, ?, ?, ?) 
+	`
+
+	res, err := db.Exec(query, title, author, num_pages, 0)
+	if err != nil {
+		return err
+	}
+	bookId, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("added new book: id=%d\n", bookId)
+
+	return nil
+}
+
 // Обновить информацию о книгах
 func UpdateBooks(db *sql.DB) error {
 	query := "update books set author = ? where author = ?"
@@ -108,6 +132,7 @@ func SelectAll(db *sql.DB) error {
 }
 
 func main() {
+	// Инициализация
 	db, err := sql.Open("sqlite3", "books.db")
 	if err != nil {
 		panic(err)
@@ -120,8 +145,20 @@ func main() {
 	}
 	fmt.Println("connected to books.db")
 
+	// Работа с БД
 	CreateTable(db)
+
 	err = InsertBooks(db)
+	if err != nil {
+		panic(err)
+	}
+
+	err = InsertBook(db, "Зов предков", "Джек Лондон", 400)
+	if err != nil {
+		panic(err)
+	}
+
+	err = InsertBook(db, "Морской волк", "Джек Лондон", 350)
 	if err != nil {
 		panic(err)
 	}
