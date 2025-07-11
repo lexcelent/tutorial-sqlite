@@ -107,6 +107,22 @@ func DeleteBooks(db *sql.DB) error {
 	return nil
 }
 
+// Удалить книгу по заголовку
+func DeleteBook(db *sql.DB, title string) error {
+	query := "delete from books where title = ?"
+	res, err := db.Exec(query, title)
+	if err != nil {
+		return err
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Rows deleted: %d\n", count)
+
+	return nil
+}
+
 // Вывести на экран информацию о книгах
 func SelectAll(db *sql.DB) error {
 	query := "select id, title, author, num_pages, rating from books"
@@ -162,5 +178,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	DeleteBook(db, "Морской волк")
 	SelectAll(db)
 }
